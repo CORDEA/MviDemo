@@ -1,22 +1,75 @@
 package jp.cordea.mvidemo.ui.login
 
-import android.view.View
+import android.arch.lifecycle.ViewModel
+import io.reactivex.Observable
+import io.reactivex.ObservableTransformer
+import io.reactivex.functions.BiFunction
+import io.reactivex.subjects.PublishSubject
 import jp.cordea.mvidemo.di.ActivityScope
-import jp.cordea.mvidemo.KeyManager
 import javax.inject.Inject
 
 @ActivityScope
-class LoginViewModel @Inject constructor(
-        private val keyManager: KeyManager,
-        private val navigator: LoginNavigator
-) {
-    var apiKey: String = ""
+class LoginViewModel : ViewModel() {
 
-    val onClick = View.OnClickListener {
-        if (apiKey.isEmpty()) {
-            return@OnClickListener
+    @Inject
+    lateinit var processors: LoginProcessors
+
+    private val intentsSubject: PublishSubject<LoginIntent> = PublishSubject.create()
+
+    private val intentFilter = ObservableTransformer<LoginIntent, LoginIntent> {
+        it.publish {
+            Observable.merge(
+                    it.ofType(LoginIntent.InitialIntent::class.java).take(1),
+                    it.ofType(LoginIntent.SaveApiKey::class.java)
+            )
         }
-        keyManager.set(apiKey)
-        navigator.navigateToMain()
     }
+
+    private val reducer = BiFunction { previous: LoginViewState, result: LoginResult ->
+        when (result) {
+            is LoginResult.TryLoginResult -> when (result) {
+                LoginResult.TryLoginResult.Success ->
+                    previous.copy(isLoginSucceeded = true)
+                LoginResult.TryLoginResult.Empty ->
+                    previous.copy(error = null)
+                is LoginResult.TryLoginResult.Failure ->
+                    previous.copy(error = result.error)
+            }
+            is LoginResult.SaveApiKeyResult -> when (result) {
+                LoginResult.SaveApiKeyResult.Success ->
+                    previous.copy(isLoginSucceeded = true)
+                is LoginResult.SaveApiKeyResult.Failure ->
+                    previous.copy(error = result.error)
+            }
+        }
+    }
+
+    val states
+        get() = compose()
+
+    fun processIntents(intents: Observable<LoginIntent>) =
+            intents.subscribe(intentsSubject)
+
+    private fun compose(): Observable<LoginViewState> =
+            intentsSubject
+                    .compose(intentFilter)
+                    .map(this::actionFromIntent)
+                    .filter { it != LoginAction.NoneAction }
+                    .compose(processors.processor)
+                    .scan(LoginViewState.idle(), reducer)
+                    .distinctUntilChanged()
+                    .replay(1)
+                    .autoConnect(0)
+
+    private fun actionFromIntent(intent: LoginIntent): LoginAction =
+            when (intent) {
+                LoginIntent.InitialIntent ->
+                    LoginAction.TryLoginAction
+                is LoginIntent.SaveApiKey ->
+                    if (intent.apiKey.isBlank()) {
+                        LoginAction.NoneAction
+                    } else {
+                        LoginAction.SaveApiKeyAction(intent.apiKey)
+                    }
+            }
 }

@@ -2,22 +2,16 @@ package jp.cordea.mvidemo.di
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
+import dagger.MembersInjector
 import javax.inject.Inject
-import javax.inject.Provider
 
-class ViewModelFactory @Inject constructor(
-        private val viewModels: Map<Class<*>, @JvmSuppressWildcards Provider<ViewModel>>
+class ViewModelFactory<V : ViewModel> @Inject constructor(
+        private val injector: MembersInjector<V>
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(model: Class<T>): T {
-        val viewModel = viewModels[model] ?: viewModels
-                .filter { model.isAssignableFrom(it.key) }
-                .map { it.value }
-                .firstOrNull()
-        viewModel?.let {
-            return it.get() as T
-        }
-        throw IllegalStateException()
-    }
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
+            modelClass.newInstance().apply {
+                injector.injectMembers(this as V)
+            }
 }
