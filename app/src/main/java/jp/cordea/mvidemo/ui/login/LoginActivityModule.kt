@@ -1,7 +1,5 @@
 package jp.cordea.mvidemo.ui.login
 
-import android.support.v4.app.FragmentActivity
-import dagger.Binds
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import jp.cordea.mvidemo.di.ActivityScope
@@ -12,13 +10,10 @@ interface LoginActivityModule {
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [
-        LoginNavigatorModule::class,
+        LoginActivityBindsModule::class,
         LoginViewModelModule::class
     ])
     fun contributeLoginActivity(): LoginActivity
-
-    @Binds
-    fun bindActivity(activity: LoginActivity): FragmentActivity
 }
 
 @Module
