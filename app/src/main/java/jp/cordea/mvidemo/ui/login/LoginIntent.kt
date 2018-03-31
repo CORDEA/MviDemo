@@ -1,6 +1,8 @@
 package jp.cordea.mvidemo.ui.login
 
-sealed class LoginIntent {
+import jp.cordea.mvidemo.mvi.MviIntent
+
+sealed class LoginIntent : MviIntent {
     object InitialIntent : LoginIntent()
 
     data class SaveApiKey(

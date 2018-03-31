@@ -1,6 +1,8 @@
 package jp.cordea.mvidemo.ui.login
 
-sealed class LoginResult {
+import jp.cordea.mvidemo.mvi.MviResult
+
+sealed class LoginResult : MviResult {
     sealed class TryLoginResult : LoginResult() {
         data class Failure(
                 val error: Throwable

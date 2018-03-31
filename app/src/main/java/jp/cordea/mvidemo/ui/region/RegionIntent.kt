@@ -1,5 +1,7 @@
 package jp.cordea.mvidemo.ui.region
 
-sealed class RegionIntent {
+import jp.cordea.mvidemo.mvi.MviIntent
+
+sealed class RegionIntent : MviIntent {
     object InitialIntent : RegionIntent()
 }

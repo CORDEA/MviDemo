@@ -6,12 +6,13 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import jp.cordea.mvidemo.di.ActivityScope
+import jp.cordea.mvidemo.mvi.MviProcessors
 import javax.inject.Inject
 
 @ActivityScope
 class LoginProcessors @Inject constructor(
         private val repository: LoginRepository
-) {
+) : MviProcessors<LoginAction, LoginResult> {
 
     private val tryLoginProcessor =
             ObservableTransformer<LoginAction.TryLoginAction, LoginResult.TryLoginResult> {
@@ -38,7 +39,7 @@ class LoginProcessors @Inject constructor(
                 }
             }
 
-    val processor =
+    override val processor =
             ObservableTransformer<LoginAction, LoginResult> {
                 it.publish {
                     Observable.merge(

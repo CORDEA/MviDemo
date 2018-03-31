@@ -5,12 +5,13 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import jp.cordea.mvidemo.di.FragmentScope
+import jp.cordea.mvidemo.mvi.MviProcessors
 import javax.inject.Inject
 
 @FragmentScope
 class RegionProcessors @Inject constructor(
         private val repository: RegionRepository
-) {
+) : MviProcessors<RegionAction, RegionResult> {
 
     private val fetchRegionsProcessor =
             ObservableTransformer<RegionAction.FetchRegionsAction, RegionResult.FetchRegionResult> {
@@ -25,7 +26,7 @@ class RegionProcessors @Inject constructor(
                 }
             }
 
-    val processor =
+    override val processor =
             ObservableTransformer<RegionAction, RegionResult> {
                 it.publish {
                     it.ofType(RegionAction.FetchRegionsAction::class.java)

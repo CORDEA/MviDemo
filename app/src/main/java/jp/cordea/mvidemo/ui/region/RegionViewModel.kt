@@ -6,10 +6,11 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 import jp.cordea.mvidemo.di.FragmentScope
+import jp.cordea.mvidemo.mvi.MviViewModel
 import javax.inject.Inject
 
 @FragmentScope
-class RegionViewModel : ViewModel() {
+class RegionViewModel : ViewModel(), MviViewModel<RegionIntent, RegionViewState> {
 
     @Inject
     lateinit var processors: RegionProcessors
@@ -34,10 +35,10 @@ class RegionViewModel : ViewModel() {
         }
     }
 
-    val states
+    override val states
         get() = compose()
 
-    fun processIntents(intents: Observable<RegionIntent>) =
+    override fun processIntents(intents: Observable<RegionIntent>) =
             intents.subscribe(intentsSubject)
 
     private fun compose(): Observable<RegionViewState> =

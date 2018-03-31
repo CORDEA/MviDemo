@@ -6,10 +6,11 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 import jp.cordea.mvidemo.di.ActivityScope
+import jp.cordea.mvidemo.mvi.MviViewModel
 import javax.inject.Inject
 
 @ActivityScope
-class LoginViewModel : ViewModel() {
+class LoginViewModel : ViewModel(), MviViewModel<LoginIntent, LoginViewState> {
 
     @Inject
     lateinit var processors: LoginProcessors
@@ -44,10 +45,10 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    val states
+    override val states
         get() = compose()
 
-    fun processIntents(intents: Observable<LoginIntent>) =
+    override fun processIntents(intents: Observable<LoginIntent>) =
             intents.subscribe(intentsSubject)
 
     private fun compose(): Observable<LoginViewState> =
