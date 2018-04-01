@@ -3,6 +3,7 @@ package jp.cordea.mvidemo.ui.login
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import dagger.Lazy
 import dagger.android.AndroidInjection
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -14,7 +15,7 @@ import javax.inject.Inject
 class LoginActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var viewModel: LoginViewModel
+    lateinit var viewModel: Lazy<LoginViewModel>
 
     @Inject
     lateinit var navigator: LoginNavigator
@@ -53,6 +54,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun bind() {
+        val viewModel = viewModel.get()
         disposables.add(viewModel.states.subscribe(::render))
         viewModel.processIntents(intents)
     }

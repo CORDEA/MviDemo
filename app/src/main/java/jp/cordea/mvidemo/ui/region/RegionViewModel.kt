@@ -5,11 +5,9 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
-import jp.cordea.mvidemo.di.FragmentScope
 import jp.cordea.mvidemo.mvi.MviViewModel
 import javax.inject.Inject
 
-@FragmentScope
 class RegionViewModel : ViewModel(), MviViewModel<RegionIntent, RegionViewState> {
 
     @Inject
@@ -35,21 +33,19 @@ class RegionViewModel : ViewModel(), MviViewModel<RegionIntent, RegionViewState>
         }
     }
 
-    override val states
-        get() = compose()
+    override val states by lazy {
+        intentsSubject
+                .compose(intentFilter)
+                .map(this::actionFromIntent)
+                .compose(processors.processor)
+                .scan(RegionViewState.idle(), reducer)
+                .distinctUntilChanged()
+                .replay(1)
+                .autoConnect(0)
+    }
 
     override fun processIntents(intents: Observable<RegionIntent>) =
             intents.subscribe(intentsSubject)
-
-    private fun compose(): Observable<RegionViewState> =
-            intentsSubject
-                    .compose(intentFilter)
-                    .map(this::actionFromIntent)
-                    .compose(processors.processor)
-                    .scan(RegionViewState.idle(), reducer)
-                    .distinctUntilChanged()
-                    .replay(1)
-                    .autoConnect(0)
 
     private fun actionFromIntent(intent: RegionIntent): RegionAction =
             when (intent) {

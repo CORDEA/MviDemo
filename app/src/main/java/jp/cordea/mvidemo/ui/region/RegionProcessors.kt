@@ -4,11 +4,9 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import jp.cordea.mvidemo.di.FragmentScope
 import jp.cordea.mvidemo.mvi.MviProcessors
 import javax.inject.Inject
 
-@FragmentScope
 class RegionProcessors @Inject constructor(
         private val repository: RegionRepository
 ) : MviProcessors<RegionAction, RegionResult> {

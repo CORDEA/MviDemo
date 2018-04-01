@@ -5,11 +5,9 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
-import jp.cordea.mvidemo.di.ActivityScope
 import jp.cordea.mvidemo.mvi.MviViewModel
 import javax.inject.Inject
 
-@ActivityScope
 class LoginViewModel : ViewModel(), MviViewModel<LoginIntent, LoginViewState> {
 
     @Inject
@@ -45,22 +43,20 @@ class LoginViewModel : ViewModel(), MviViewModel<LoginIntent, LoginViewState> {
         }
     }
 
-    override val states
-        get() = compose()
+    override val states by lazy {
+        intentsSubject
+                .compose(intentFilter)
+                .map(this::actionFromIntent)
+                .filter { it != LoginAction.NoneAction }
+                .compose(processors.processor)
+                .scan(LoginViewState.idle(), reducer)
+                .distinctUntilChanged()
+                .replay(1)
+                .autoConnect(0)
+    }
 
     override fun processIntents(intents: Observable<LoginIntent>) =
             intents.subscribe(intentsSubject)
-
-    private fun compose(): Observable<LoginViewState> =
-            intentsSubject
-                    .compose(intentFilter)
-                    .map(this::actionFromIntent)
-                    .filter { it != LoginAction.NoneAction }
-                    .compose(processors.processor)
-                    .scan(LoginViewState.idle(), reducer)
-                    .distinctUntilChanged()
-                    .replay(1)
-                    .autoConnect(0)
 
     private fun actionFromIntent(intent: LoginIntent): LoginAction =
             when (intent) {

@@ -5,11 +5,9 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import jp.cordea.mvidemo.di.ActivityScope
 import jp.cordea.mvidemo.mvi.MviProcessors
 import javax.inject.Inject
 
-@ActivityScope
 class LoginProcessors @Inject constructor(
         private val repository: LoginRepository
 ) : MviProcessors<LoginAction, LoginResult> {

@@ -44,10 +44,12 @@ class MainActivity : AppCompatActivity(),
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.container, RegionFragment.newInstance())
-                .commit()
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.container, RegionFragment.newInstance())
+                    .commit()
+        }
     }
 
     override fun onBackPressed() {
