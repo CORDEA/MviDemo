@@ -16,6 +16,7 @@ class RegionRepository @Inject constructor(
     fun fetchRegion(forceFetch: Boolean): Maybe<List<Region>> =
             if (forceFetch) {
                 dataSource.fetchRegion()
+                        .doOnSuccess { localDataSource.cacheRegion(it) }
             } else {
                 localDataSource.fetchRegion()
                         .switchIfEmpty(
